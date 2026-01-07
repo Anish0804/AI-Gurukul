@@ -6,7 +6,7 @@ The Repository currently contains the sqlite db file along with the code to host
 
 1. Download the files and store it in the same folder
 2. pip install the following libraries -> fastapi & uvicorn (command to run -> pip install fastapi uvicorn)
-3. run the server in localhost (command to run -> main:app --reload)
+3. run the server in localhost (command to run ->uvicorn main:app --reload)
 4. Once the server starts running the following API endpoints are exposed :  
    1."/api/accounts/{account}/balance"  
    2."/api/accounts/{account}/statements/adhoc"  

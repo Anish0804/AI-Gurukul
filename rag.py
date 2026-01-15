@@ -2,12 +2,12 @@ import os
 from dotenv import load_dotenv
 from langchain_community.document_loaders import CSVLoader, PyPDFLoader
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_community.vectorstores import DocArrayInMemorySearch
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_classic.chains import create_retrieval_chain
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from pathlib import Path
 
 # 🔐 Load environment variables
@@ -96,19 +96,38 @@ if not documents:
     print("❌ No documents loaded. Please check your folder path and files.")
     exit()
 
-# 🧠 Create embeddings
-print("🧠 Creating embeddings...")
+# 🧠 Create embeddings and FAISS vector store
+print("🧠 Creating embeddings and FAISS vector store...")
 embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
 embedding = HuggingFaceEmbeddings(model_name=embedding_model)
-vector_store = DocArrayInMemorySearch.from_documents(documents, embedding)
-print("✅ Vector store created successfully\n")
+
+# Create FAISS vector store from documents
+vector_store = FAISS.from_documents(documents, embedding)
+print("✅ FAISS vector store created successfully\n")
+
+faiss_index_path = "faiss_index"
+vector_store.save_local(faiss_index_path)
+print(f"💾 FAISS index saved to {faiss_index_path}\n")
+
+faiss_index_path = "faiss_index"
+vector_store = FAISS.load_local(
+    faiss_index_path, 
+    embedding,
+    allow_dangerous_deserialization=True
+)
+print(f"📥 FAISS index loaded from {faiss_index_path}\n")
+
 
 # ✅ Use built-in retriever
-retriever = vector_store.as_retriever()
+# You can customize the retriever with search_kwargs
+retriever = vector_store.as_retriever(
+    search_type="similarity",  # or "mmr" for Maximum Marginal Relevance
+    search_kwargs={"k": 4}  # Number of documents to retrieve
+)
 
 # Use Ollama LLaMA 3.2 model
 print("🤖 Initializing Ollama LLM...")
-llm = Ollama(model="llama3.2:latest", base_url="http://localhost:11434")
+llm = OllamaLLM(model="gemma3:4b", base_url="http://localhost:11434")
 print("✅ LLM initialized\n")
 
 # 🧠 Prompt template
@@ -135,6 +154,7 @@ qa_chain = create_retrieval_chain(retriever, stuff_chain)
 print("=" * 60)
 print("🚀 Multi-Format Question Answering System Ready!")
 print("   Supports: CSV files and PDF documents")
+print("   Vector Store: FAISS")
 print("=" * 60)
 print("Type 'quit', 'exit', or 'q' to stop\n")
 
@@ -171,13 +191,3 @@ while True:
         
     except Exception as e:
         print(f"❌ Error processing question: {str(e)}\n")
-
-# Alternative: Single question mode (comment out the loop above and uncomment below)
-"""
-question = "Show my account transaction from Jan 05 to Jan 10??"
-print(f"🙋 Question: {question}\n")
-response = qa_chain.invoke({"input": question})
-print("-" * 60)
-print("🤖 Bot:", response["answer"])
-print("-" * 60)
-"""

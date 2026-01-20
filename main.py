@@ -78,6 +78,14 @@ def login(req: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return {"status": "success"}
 
+# ADDED THIS NEW ENDPOINT HERE
+@app.get("/welcome")
+def get_welcome_message():
+    return {
+        "message": "Hi, I am your banking assistant. How can I help you today?",
+        "status": "ready"
+    }
+
 '''@app.post("/chat")
 def chat(req: ChatRequest):
     response = llm.invoke(req.message)

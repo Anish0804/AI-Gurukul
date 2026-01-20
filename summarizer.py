@@ -6,13 +6,21 @@ llm = Ollama(
     base_url="http://localhost:11434"
 )
 
-def summarize(tool_name: str, tool_output: dict) -> str:
-        prompt = f"""
-    Tool used: {tool_name}
+def summarize(tool_name, tool_result, rag_context):
+    prompt = f"""
+You are a banking assistant.
 
-    Tool output:
-    {json.dumps(tool_output, indent=2)}
+Authoritative data (from database):
+{tool_result}
 
-    Explain this clearly to the user in plain English.
-    """
-        return llm.invoke(prompt)
+Reference material (for explanation/format only):
+{rag_context}
+
+Rules:
+- Do NOT invent values
+- DB values override everything
+- Use reference only for explanation
+"""
+
+    return llm.invoke(prompt)
+

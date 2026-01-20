@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException
 from langchain_community.llms import Ollama
-
+from rag_service import get_rag_context
 
 from planner import plan_tool_call
 #from mcp_client import call_mcp_tool
@@ -15,21 +15,24 @@ import json
 
 DB_NAME = "AIGurukul.db"
 
-from mcp_tools import (
+'''from mcp_tools import (
     get_account_balance,
     get_transaction_history,
     get_adhoc_statements,
     get_periodic_statements,
 )
 
-app = FastAPI()
+
 
 tools = [
     get_account_balance,
     get_transaction_history,
     get_adhoc_statements,
     get_periodic_statements,
-]
+]'''
+
+app = FastAPI()
+
 llm = Ollama(
     model="gemma3:4b",
     base_url="http://localhost:11434"
@@ -237,7 +240,9 @@ def chat(req: ChatRequest):
 
     if plan["type"] == "tool":
         tool_result = execute_tool(plan["tool"], plan["args"])
-        final_answer = summarize(plan["tool"], tool_result)
+        rag_context = get_rag_context("bank statement format transaction explanation")
+        
+        final_answer = summarize(tool_name=plan["tool"],tool_result=tool_result,rag_context=rag_context)
         return {"response": final_answer}
 
     elif plan["type"] == "chat":

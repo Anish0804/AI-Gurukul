@@ -15,18 +15,16 @@ retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
 
 def get_rag_context(query: str) -> str:
-    """
-    Returns reference context ONLY.
-    No DB values. No decisions.
-    """
     docs = retriever.invoke(query)
-    
 
-    context_blocks = []
-    for d in docs:
-        source = d.metadata.get("source", "unknown")
-        context_blocks.append(
-            f"\n--- Reference from {source} ---\n{d.page_content}"
-        )
+    if not docs:
+        return ""
 
-    return "\n".join(context_blocks)
+    return "\n".join(
+        f"""
+REFERENCE MATERIAL (DO NOT USE AS DATA):
+{d.page_content}
+"""
+        for d in docs
+    )
+

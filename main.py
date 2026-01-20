@@ -199,7 +199,29 @@ def get_adhoc_statements(account: int):
         "adhocStatements": [dict(row) for row in rows]
     }
 
+FINAL_ANSWER_PROMPT = """
+You are a banking assistant.
 
+CRITICAL RULES:
+1. ALL factual information (names, balances, dates, amounts, transactions)
+   MUST come ONLY from the tool response.
+2. The reference documents are for explanation or formatting ONLY.
+3. If a value is missing in the tool response, say:
+   "This information is not available."
+4. NEVER infer, guess, or copy data from reference documents.
+5. If reference content conflicts with tool data, IGNORE the reference.
+
+Tool Response (FACTS):
+{tool_data}
+
+Reference Material (DO NOT USE AS DATA):
+{rag_context}
+
+User Question:
+{question}
+
+Answer clearly and professionally.
+"""
 # 5️⃣ Periodic (Current) Statements
 @app.get("/api/accounts/{account}/statements/current")
 def get_periodic_statements(account: int):
@@ -242,7 +264,7 @@ def chat(req: ChatRequest):
         tool_result = execute_tool(plan["tool"], plan["args"])
         rag_context = get_rag_context("bank statement format transaction explanation")
         
-        final_answer = summarize(tool_name=plan["tool"],tool_result=tool_result,rag_context=rag_context)
+        final_answer = summarize(tool_name=plan["tool"],tool_result=tool_result,rag_context=rag_context,user_question=req.message)
         return {"response": final_answer}
 
     elif plan["type"] == "chat":

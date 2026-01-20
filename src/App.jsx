@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React from 'react'
+import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
@@ -9,6 +10,26 @@ function App() {
 
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+
+  // Fetch and display welcome message when user logs in
+  useEffect(() => {
+    if (loggedIn && messages.length === 0) {
+      const fetchWelcomeMessage = async () => {
+        try {
+          const res = await fetch("http://127.0.0.1:8000/welcome");
+          const data = await res.json();
+          setMessages([{ role: "bot", text: data.message }]);
+        } catch (err) {
+          // Fallback to default message if API fails
+          setMessages([{ 
+            role: "bot", 
+            text: "Hi, I am your banking assistant. How can I help you today?" 
+          }]);
+        }
+      };
+      fetchWelcomeMessage();
+    }
+  }, [loggedIn, messages.length]);
 
   const login = async () => {
     setError("");

@@ -1,0 +1,80 @@
+flowchart TD
+
+    %% User Interface
+    User[User via Copilot Chat UI]
+
+    %% Copilot Runtime
+    Copilot[Copilot Studio Runtime]
+
+    %% Topics and Guardrails
+    Topics[Topics and Triggers]
+    AccessGuard[Input and Access Guardrails]
+
+    %% Orchestration
+    Orchestrator[Copilot Orchestrator]
+
+    %% Actions
+    ActionBalance[Action Get Account Balance]
+    ActionTxn[Action Get Transaction History]
+    ActionAdhoc[Action Get Adhoc Statements]
+    ActionPeriodic[Action Get Periodic Statements]
+
+    %% Connectors
+    Connector[Custom Connector]
+
+    %% Backend
+    BankAPI[Secure Banking API]
+    DB[(Banking Database)]
+
+    %% Knowledge and RAG
+    Knowledge[Copilot Knowledge Sources]
+    VectorDB[(Enterprise Vector Store)]
+
+    %% Insights
+    InsightEngine[Generative Insight Prompt]
+
+    %% Output Controls
+    OutputGuard[Output Guardrails]
+
+    %% Response
+    Response[Formatted Copilot Response]
+
+    %% Flow Steps
+    User -->|1| Copilot
+    Copilot -->|2| Topics
+    Topics -->|3| AccessGuard
+    AccessGuard -->|4| Orchestrator
+
+    %% Tool Selection
+    Orchestrator -->|5a| ActionBalance
+    Orchestrator -->|5b| ActionTxn
+    Orchestrator -->|5c| ActionAdhoc
+    Orchestrator -->|5d| ActionPeriodic
+
+    %% Connector Calls
+    ActionBalance -->|6| Connector
+    ActionTxn -->|6| Connector
+    ActionAdhoc -->|6| Connector
+    ActionPeriodic -->|6| Connector
+
+    %% Backend
+    Connector -->|7| BankAPI
+    BankAPI -->|8| DB
+    DB -->|9| BankAPI
+    BankAPI -->|10| Connector
+    Connector -->|11| Orchestrator
+
+    %% RAG
+    Orchestrator -->|12| Knowledge
+    Knowledge -->|13| VectorDB
+    VectorDB -->|14| Knowledge
+    Knowledge -->|15| Orchestrator
+
+    %% Insights
+    Orchestrator -->|16| InsightEngine
+    InsightEngine -->|17| Orchestrator
+
+    %% Finalization
+    Orchestrator -->|18| OutputGuard
+    OutputGuard -->|19| Response
+    Response -->|20| User

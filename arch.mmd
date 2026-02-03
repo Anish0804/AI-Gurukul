@@ -1,54 +1,82 @@
 flowchart TD
 
-    %% User Entry
-    User[User]
-    API[FastAPI Gateway]
+    %% Frontend
+    FE[React Frontend UI]
 
-    %% Core Intelligence
-    Guardrails[Input & Access Guardrails]
-    Planner[LLM Planner / Orchestrator]
+    %% Backend Entry
+    API[FastAPI Server]
+
+    %% Guardrails
+    InGuard[Input and Access Guardrails]
+    OutGuard[Output Guardrails]
+
+    %% Intelligence Core
+    Planner[LLM Planner and Orchestrator]
     LLM[LLM Core]
 
-    %% Tooling Layer
+    %% MCP Layer
     MCP[MCP Server]
+
+    %% MCP Tools
+    ToolBalance[get_account_balance]
+    ToolTxn[get_transaction_history]
+    ToolAdhoc[get_adhoc_statements]
+    ToolPeriodic[get_periodic_statements]
+
+    %% Internal API and DB
+    BankAPI[Internal Banking API Server]
     DB[(Banking Database)]
 
-    %% RAG & Insights
+    %% RAG and Insights
     RAG[RAG Service]
     VectorDB[(Vector Store)]
-    InsightEngine[Insight Engine]
-
-    %% Response
-    Response[Final Response]
-
-    %% User Flow
-    User --> API
-    API --> Guardrails
-    Guardrails --> Planner
-
-    %% Planner Decisions
-    Planner --> MCP
-    Planner --> RAG
-    Planner --> InsightEngine
-
-    %% MCP Tool Execution
-    MCP --> DB
-    DB --> MCP
-    MCP --> Planner
-
-    %% RAG Retrieval
-    RAG --> VectorDB
-    VectorDB --> RAG
-    RAG --> Planner
-
-    %% Insight Generation
-    InsightEngine --> Planner
-
-    %% LLM Invocation
-    Planner --> LLM
-    LLM --> Planner
+    InsightEngine[Investment Insight Engine]
 
     %% Final Output
-    Planner --> Response
-    Response --> API
-    API --> User
+    Response[Final Response Formatter]
+
+    %% Flow Steps
+    FE -->|1| API
+    API -->|2| InGuard
+    InGuard -->|3| Planner
+
+    %% Planner to MCP
+    Planner -->|4| MCP
+
+    %% MCP Tool Selection
+    MCP -->|5a| ToolBalance
+    MCP -->|5b| ToolTxn
+    MCP -->|5c| ToolAdhoc
+    MCP -->|5d| ToolPeriodic
+
+    %% Tools to Internal API
+    ToolBalance -->|6| BankAPI
+    ToolTxn -->|6| BankAPI
+    ToolAdhoc -->|6| BankAPI
+    ToolPeriodic -->|6| BankAPI
+
+    %% API to DB and Back
+    BankAPI -->|7| DB
+    DB -->|8| BankAPI
+    BankAPI -->|9| MCP
+    MCP -->|10| Planner
+
+    %% RAG Flow
+    Planner -->|11| RAG
+    RAG -->|12| VectorDB
+    VectorDB -->|13| RAG
+    RAG -->|14| Planner
+
+    %% Insight Engine
+    Planner -->|15| InsightEngine
+    InsightEngine -->|16| Planner
+
+    %% LLM Reasoning
+    Planner -->|17| LLM
+    LLM -->|18| Planner
+
+    %% Finalization
+    Planner -->|19| Response
+    Response -->|20| OutGuard
+    OutGuard -->|21| API
+    API -->|22| FE

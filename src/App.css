@@ -79,7 +79,32 @@ html, body, #root {
   height: 100%;
   margin: 0;
 }
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
 
+.user-info {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+}
 /* Full page login screen */
 .login-container {
   height: 50vh;
